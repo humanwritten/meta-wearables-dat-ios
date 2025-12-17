@@ -15,6 +15,7 @@
 //
 
 import SwiftUI
+import MWDATCore
 
 struct RelayStatusView: View {
     @ObservedObject var viewModel: StreamSessionViewModel

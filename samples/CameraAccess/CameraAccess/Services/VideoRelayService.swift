@@ -69,7 +69,9 @@ class VideoRelayService: NSObject, ObservableObject {
 
     private let serviceType = "meta-glasses"  // Must be 1-15 chars, lowercase + hyphens
     private let myPeerID: MCPeerID
-    private var session: MCSession?
+    // nonisolated(unsafe) because MultipeerConnectivity delegates are called on arbitrary threads
+    // but we manage the session lifecycle carefully from MainActor
+    nonisolated(unsafe) private var session: MCSession?
     private var advertiser: MCNearbyServiceAdvertiser?
     private var browser: MCNearbyServiceBrowser?
     private let mode: Mode
