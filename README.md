@@ -1,7 +1,37 @@
-# Meta Wearables Device Access Toolkit for iOS
+# Meta Wearables Device Access Toolkit for iOS (Mac Relay Fork)
 
 [![Swift Package](https://img.shields.io/badge/Swift_Package-0.3.0-brightgreen?logo=swift&logoColor=white)](https://github.com/facebook/meta-wearables-dat-ios/tags)
 [![Docs](https://img.shields.io/badge/API_Reference-0.3-blue?logo=meta)](https://wearables.developer.meta.com/docs/reference/ios_swift/dat/0.3)
+
+> **This is a fork** that adds **Mac relay functionality** - stream video from Meta AI glasses to your Mac via MultipeerConnectivity (works over WiFi and USB).
+
+## 🆕 Mac Relay Feature
+
+This fork adds the ability to relay the glasses video stream to a Mac app:
+
+```
+Meta Glasses → (Bluetooth) → iPhone → (WiFi/USB) → Mac
+```
+
+### Features Added
+- **VideoRelayService**: MultipeerConnectivity-based streaming service
+- **Mac Receiver App**: macOS companion app to display video stream
+- **Relay Controls**: Toggle in iOS app to enable/disable Mac streaming
+- **Quality Control**: Adjustable JPEG compression for bandwidth/quality tradeoff
+- **Stats Display**: FPS, bandwidth, and connection status
+
+### Quick Start
+
+1. **iOS App**: Open `samples/CameraAccess` in Xcode, build and run on iPhone
+2. **Mac App**: Open `MacReceiver/Package.swift` in Xcode, build and run on Mac
+3. **Connect**: Enable "Mac Relay" toggle on iOS, start streaming
+4. **View**: Video appears on Mac automatically
+
+See [MacReceiver/README.md](MacReceiver/README.md) for detailed instructions.
+
+---
+
+## Original README
 
 The Meta Wearables Device Access Toolkit enables developers to utilize Meta's AI glasses to build hands-free wearable experiences into their mobile applications.
 By integrating this SDK, developers can reliably connect to Meta's AI glasses and leverage capabilities like video streaming and photo capture.

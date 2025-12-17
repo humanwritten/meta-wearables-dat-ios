@@ -4,6 +4,8 @@
  *
  * This source code is licensed under the license found in the
  * LICENSE file in the root directory of this source tree.
+ *
+ * Modified by humanwritten to add Mac relay functionality via MultipeerConnectivity
  */
 
 //
@@ -13,10 +15,13 @@
 // This class showcases the key streaming patterns: device selection, session management,
 // video frame handling, photo capture, and error handling.
 //
+// ADDED: Mac relay support - broadcasts frames to connected Mac receivers via MultipeerConnectivity
+//
 
 import MWDATCamera
 import MWDATCore
 import SwiftUI
+import MultipeerConnectivity
 
 enum StreamingStatus {
   case streaming
@@ -44,6 +49,27 @@ class StreamSessionViewModel: ObservableObject {
   // Photo capture properties
   @Published var capturedPhoto: UIImage?
   @Published var showPhotoPreview: Bool = false
+
+  // MARK: - Mac Relay Properties (ADDED)
+  @Published var isRelayEnabled: Bool = false {
+    didSet {
+      if isRelayEnabled {
+        videoRelay.start()
+      } else {
+        videoRelay.stop()
+      }
+    }
+  }
+  @Published var relayConnectionState: VideoRelayService.ConnectionState = .disconnected
+  @Published var relayFrameRate: Double = 0
+  @Published var relayBytesPerSecond: Int = 0
+  @Published var connectedMacs: [String] = []
+
+  /// Quality of JPEG compression for relay (0.0 - 1.0)
+  /// Lower = smaller data, faster transmission, lower quality
+  @Published var relayCompressionQuality: CGFloat = 0.5
+
+  let videoRelay = VideoRelayService(mode: .broadcaster)
 
   private var timerTask: Task<Void, Never>?
   // The core DAT SDK StreamSession - handles all streaming operations
@@ -93,6 +119,11 @@ class StreamSessionViewModel: ObservableObject {
           if !self.hasReceivedFirstFrame {
             self.hasReceivedFirstFrame = true
           }
+
+          // ADDED: Broadcast frame to connected Macs if relay is enabled
+          if self.isRelayEnabled {
+            self.videoRelay.broadcastImage(image, compressionQuality: self.relayCompressionQuality)
+          }
         }
       }
     }
@@ -120,6 +151,35 @@ class StreamSessionViewModel: ObservableObject {
           self.capturedPhoto = uiImage
           self.showPhotoPreview = true
         }
+      }
+    }
+
+    // MARK: - Mac Relay Setup (ADDED)
+    // Observe relay service state changes
+    setupRelayObservers()
+  }
+
+  // MARK: - Relay Observers (ADDED)
+  private func setupRelayObservers() {
+    // Observe connection state
+    Task { @MainActor in
+      for await _ in videoRelay.$connectionState.values {
+        self.relayConnectionState = videoRelay.connectionState
+        self.connectedMacs = videoRelay.connectedPeers.map { $0.displayName }
+      }
+    }
+
+    // Observe frame rate
+    Task { @MainActor in
+      for await _ in videoRelay.$frameRate.values {
+        self.relayFrameRate = videoRelay.frameRate
+      }
+    }
+
+    // Observe bandwidth
+    Task { @MainActor in
+      for await _ in videoRelay.$bytesPerSecond.values {
+        self.relayBytesPerSecond = videoRelay.bytesPerSecond
       }
     }
   }

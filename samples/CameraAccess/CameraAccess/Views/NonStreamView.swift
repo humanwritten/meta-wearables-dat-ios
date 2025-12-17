@@ -4,6 +4,8 @@
  *
  * This source code is licensed under the license found in the
  * LICENSE file in the root directory of this source tree.
+ *
+ * Modified by humanwritten to add Mac relay UI
  */
 
 //
@@ -11,6 +13,8 @@
 //
 // Default screen to show getting started tips after app connection
 // Initiates streaming
+//
+// ADDED: Mac relay status view for streaming to Mac
 //
 
 import MWDATCore
@@ -64,6 +68,10 @@ struct NonStreamView: View {
         .padding(.horizontal, 12)
 
         Spacer()
+
+        // ADDED: Mac Relay controls
+        RelayStatusView(viewModel: viewModel)
+          .padding(.bottom, 16)
 
         HStack(spacing: 8) {
           Image(systemName: "hourglass")
